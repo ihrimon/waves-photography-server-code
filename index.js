@@ -17,28 +17,28 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
-
         // Connect to database
         await client.connect();
-        console.log('database connected successfully.')
+        // console.log('database connected')
 
         const database = client.db("waves_photography")
         const productCollection = database.collection("products")
         const orderCollection = database.collection("orders")
+        const usersCollection = database.collection('users');
 
-        // Get Packages API
+        // Get Products API
         app.get('/products', async (req, res) => {
             const cursor = productCollection.find({});
             const packages = await cursor.toArray();
             res.send(packages);
         })
 
-        // // Add Packages API
-        // app.post('/packages', async (req, res) => {
-        //     const package = req.body;
-        //     const result = await packageCollection.insertOne(package);
-        //     res.json(result);
-        // })
+        // Add Product API
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await productCollection.insertOne(product);
+            res.json(result);
+        })
 
         // Get Single Package
         app.get('/products/:id', async (req, res) => {
@@ -55,44 +55,64 @@ async function run() {
             res.json(result);
         })
 
-        // // Get Orders API
-        // app.get('/orders', async (req, res) => {
-        //     const cursor = orderCollection.find({});
-        //     const orders = await cursor.toArray();
-        //     res.send(orders);
-        // })
 
-        // // Get MyOrders API
-        // app.post('/orders/email', async (req, res) => {
-        //     const email = req.body.email;
-        //     const query = { "email": email };
-        //     const result = await orderCollection.find(query).toArray();
-        //     res.json(result);
-        // })
+        // Get Orders API
+        app.get('/orders', async (req, res) => {
+            const cursor = orderCollection.find({});
+            const orders = await cursor.toArray();
+            res.send(orders);
+        })
 
-        // // Update Status
-        // app.post('/orders/:id', async (req, res) => {
-        //     const id = req.body.id;
-        //     const status = req.body.status;
+        // Get MyOrders API
+        app.post('/orders/email', async (req, res) => {
+            const email = req.body.email;
+            const query = { "email": email };
+            const result = await orderCollection.find(query).toArray();
+            res.json(result);
+        })
 
-        //     const filter = { _id: ObjectId(id) };
-        //     const options = { upsert: true };
-        //     const updateStatus = {
-        //         $set: {
-        //             "status": status === "pending" ? "approve" : "pending"
-        //         }
-        //     };
-        //     const result = await orderCollection.updateOne(filter, updateStatus, options);
-        //     res.json(result);
-        // })
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
+            res.json(result);
+        });
 
-        // // Delete Orders API
-        // app.delete('/orders/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const query = { _id: ObjectId(id) };
-        //     const result = await orderCollection.deleteOne(query);
-        //     res.json(result);
-        // })
+        // upsert using for google login
+        app.put('/users', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const options = { upsert: true };
+            const updateDoc = { $set: user };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            res.json(result);
+        });
+
+        app.put('/users/admin', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const updateDoc = { $set: { role: 'admin' } };
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        })
+
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            let isAdmin = false;
+            if (user?.role === 'admin') {
+                isAdmin = true;
+            }
+            res.json({ admin: isAdmin })
+        })
+
+        // Delete Orders API
+        app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.deleteOne(query);
+            res.json(result);
+        })
     }
     finally {
         // await client.close();
@@ -105,7 +125,6 @@ app.get('/', (req, res) => {
     res.send('Waves Photography website node mongo server')
 });
 
-
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
+    console.log(`listening at http://localhost:${port}`)
 })
