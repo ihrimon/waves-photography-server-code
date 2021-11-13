@@ -41,9 +41,17 @@ async function run() {
 
         // Send review to database
         app.post('/reviews', async (req, res) => {
+            console.log("hitting")
             const review = req.body;
             const result = await reviewCollection.insertOne(review);
             res.json(result);
+        })
+
+        // Get review
+        app.get('/reviews', async (req, res) => {
+            const cursor = reviewCollection.find({});
+            const packages = await cursor.toArray();
+            res.send(packages);
         })
 
         // Get Single product id
