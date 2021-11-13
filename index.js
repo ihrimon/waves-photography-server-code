@@ -122,23 +122,7 @@ async function run() {
             res.json({ admin: isAdmin })
         });
 
-        // Update Status
-        app.post('/orders/:id', async (req, res) => {
-            const id = req.body.id;
-            const status = req.body.status;
-
-            const filter = { _id: ObjectId(id) };
-            const options = { upsert: true };
-            const updateStatus = {
-                $set: {
-                    "status": status === "pending" ? "approve" : "pending"
-                }
-            };
-            const result = await orderCollection.updateOne(filter, updateStatus, options);
-            res.json(result);
-        })
-
-        // / update status
+        //update status
         app.post('/updateStatus', async (req, res) => {
             const id = req.body.id;
             const status = req.body.status;
@@ -187,22 +171,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`listening at http://localhost:${port}`)
 })
-
-
-
-// //add review
-// app.post('/addReview', async(req, res) => {
-//     const data = req.body;
-//     const result = await reviewCollection.insertOne(data);
-
-//     res.json(result);
-//   })
-
-//   //get all review
-//   app.get('/getAllReview', async (req, res) => {
-
-//     const cursor = reviewCollection.find({});
-//     const review = await cursor.toArray();
-
-//     res.json(review);
-//   })
