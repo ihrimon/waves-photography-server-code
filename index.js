@@ -11,7 +11,7 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-
+// add Database User with env
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.zaiok.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -19,28 +19,26 @@ async function run() {
     try {
         // Connect to database
         await client.connect();
-        // console.log('database connected')
-
         const database = client.db("waves_photography")
         const productCollection = database.collection("products")
         const orderCollection = database.collection("orders")
         const usersCollection = database.collection('users');
 
-        // Get Products API
+        // Get Products to database
         app.get('/products', async (req, res) => {
             const cursor = productCollection.find({});
             const packages = await cursor.toArray();
             res.send(packages);
         })
 
-        // Add Product API
+        // Send Single Product to database
         app.post('/products', async (req, res) => {
             const product = req.body;
             const result = await productCollection.insertOne(product);
             res.json(result);
         })
 
-        // Get Single Package
+        // Get Single product id
         app.get('/products/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -48,22 +46,21 @@ async function run() {
             res.json(package);
         })
 
-        // Add Orders API
+        // Send Order to database
         app.post('/orders', async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
             res.json(result);
         })
 
-
-        // Get Orders API
+        // Get Orders to database
         app.get('/orders', async (req, res) => {
             const cursor = orderCollection.find({});
             const orders = await cursor.toArray();
             res.send(orders);
         })
 
-        // Get MyOrders API
+        // Get email with filter for my orders
         app.post('/orders/email', async (req, res) => {
             const email = req.body.email;
             const query = { "email": email };
@@ -71,13 +68,14 @@ async function run() {
             res.json(result);
         })
 
+        // Send User to database
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
             res.json(result);
         });
 
-        // upsert using for google login
+        // Upsert using for google login user
         app.put('/users', async (req, res) => {
             const user = req.body;
             const filter = { email: user.email };
@@ -87,6 +85,7 @@ async function run() {
             res.json(result);
         });
 
+        // Send admin role
         app.put('/users/admin', async (req, res) => {
             const user = req.body;
             const filter = { email: user.email };
@@ -95,6 +94,7 @@ async function run() {
             res.json(result);
         })
 
+        // Find admin role with filter by email
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
