@@ -23,6 +23,7 @@ async function run() {
         const productCollection = database.collection("products")
         const orderCollection = database.collection("orders")
         const usersCollection = database.collection('users');
+        const reviewCollection = database.collection('reviews');
 
         // Get Products to database
         app.get('/products', async (req, res) => {
@@ -31,10 +32,17 @@ async function run() {
             res.send(packages);
         })
 
-        // Send Single Product to database
+        // Send Product to database
         app.post('/products', async (req, res) => {
             const product = req.body;
             const result = await productCollection.insertOne(product);
+            res.json(result);
+        })
+
+        // Send review to database
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
             res.json(result);
         })
 
@@ -106,6 +114,41 @@ async function run() {
             res.json({ admin: isAdmin })
         });
 
+        // Update Status
+        app.post('/orders/:id', async (req, res) => {
+            const id = req.body.id;
+            const status = req.body.status;
+
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateStatus = {
+                $set: {
+                    "status": status === "pending" ? "approve" : "pending"
+                }
+            };
+            const result = await orderCollection.updateOne(filter, updateStatus, options);
+            res.json(result);
+        })
+
+        // / update status
+        app.post('/updateStatus', async (req, res) => {
+            const id = req.body.id;
+            const status = req.body.status;
+
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updateStatus = {
+                $set: {
+                    "status": status === 'pending' ? 'approved ' : 'pending'
+                },
+            };
+
+            const result = await orderCollection.updateOne(filter, updateStatus, options);
+
+            console.log('database hitted', result);
+            res.json(result);
+        })
+
         // Delete Orders
         app.delete('/orders/:id', async (req, res) => {
             const id = req.params.id;
@@ -136,3 +179,22 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`listening at http://localhost:${port}`)
 })
+
+
+
+// //add review
+// app.post('/addReview', async(req, res) => {
+//     const data = req.body;
+//     const result = await reviewCollection.insertOne(data);
+
+//     res.json(result);
+//   })
+
+//   //get all review
+//   app.get('/getAllReview', async (req, res) => {
+
+//     const cursor = reviewCollection.find({});
+//     const review = await cursor.toArray();
+
+//     res.json(review);
+//   })
