@@ -146,7 +146,7 @@ async function run() {
             const options = { upsert: true };
             const updateStatus = {
                 $set: {
-                    "status": status === 'Processing' ? 'Shipped ' : 'Processing'
+                    "status": status === 'Shipping' ? 'Shipped ' : 'Shipping'
                 },
             };
             const result = await orderCollection.updateOne(filter, updateStatus, options);
