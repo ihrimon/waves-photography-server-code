@@ -106,7 +106,7 @@ async function run() {
             const user = req.body;
             const filter = { email: user.email };
             const updateDoc = { $set: { role: 'admin' } };
-            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            const result = await usersCollection.updateOne(filter, updateDoc);
             res.json(result);
         })
 
@@ -135,7 +135,7 @@ async function run() {
             };
             const result = await orderCollection.updateOne(filter, updateStatus, options);
             res.json(result);
-        })
+        });
 
         // Delete Orders
         app.delete('/orders/:id', async (req, res) => {
