@@ -106,7 +106,7 @@ async function run() {
             const user = req.body;
             const filter = { email: user.email };
             const options = { upsert: true };
-            const updateDoc = { $set: { role: 'admin'} };
+            const updateDoc = { $set: { role: 'admin' } };
             const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.json(result);
         })
@@ -123,26 +123,30 @@ async function run() {
             res.json({ admin: isAdmin })
         });
 
-        // Send status
-        app.put('/orders/updateStatus', async (req, res) => {
-            const order = req.body;
-            const filter = { email: order.email };
-            const updateDoc = { $set: { shipping: 'shipping', process: 'pending' } };
-            const result = await orderCollection.updateOne(filter, updateDoc);
-            res.json(result);
-        })
-
-
-        //update status
+        //Order approve status
         app.post('/updateStatus', async (req, res) => {
             const id = req.body.id;
             const status = req.body.status;
-
             const filter = { _id: ObjectId(id) }
             const options = { upsert: true };
             const updateStatus = {
                 $set: {
-                    "status": status === 'pending' ? 'approved ' : 'pending'
+                    "status": status === 'Pending' ? 'Approved ' : 'Pending'
+                },
+            };
+            const result = await orderCollection.updateOne(filter, updateStatus, options);
+            res.json(result);
+        })
+
+        // Order Shipped status
+        app.post('/updateStatus', async (req, res) => {
+            const id = req.body.id;
+            const status = req.body.status;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updateStatus = {
+                $set: {
+                    "status": status === 'Processing' ? 'Shipped ' : 'Processing'
                 },
             };
             const result = await orderCollection.updateOne(filter, updateStatus, options);
