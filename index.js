@@ -105,7 +105,7 @@ async function run() {
         app.put('/users/admin', async (req, res) => {
             const user = req.body;
             const filter = { email: user.email };
-            const updateDoc = { $set: { role: 'admin' } };
+            const updateDoc = { $set: { role: 'admin', job: 'development' } };
             const result = await usersCollection.updateOne(filter, updateDoc);
             res.json(result);
         })
@@ -122,6 +122,16 @@ async function run() {
             res.json({ admin: isAdmin })
         });
 
+        // Send status
+        app.put('/orders/updateStatus', async (req, res) => {
+            const order = req.body;
+            const filter = { email: order.email };
+            const updateDoc = { $set: { shipping: 'shipping', process: 'pending' } };
+            const result = await orderCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        })
+
+
         //update status
         app.post('/updateStatus', async (req, res) => {
             const id = req.body.id;
@@ -134,10 +144,7 @@ async function run() {
                     "status": status === 'pending' ? 'approved ' : 'pending'
                 },
             };
-
             const result = await orderCollection.updateOne(filter, updateStatus, options);
-
-            console.log('database hitted', result);
             res.json(result);
         })
 
