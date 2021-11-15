@@ -123,7 +123,7 @@ async function run() {
             res.json({ admin: isAdmin })
         });
 
-        //Order approve status
+        //update status
         app.post('/updateStatus', async (req, res) => {
             const id = req.body.id;
             const status = req.body.status;
@@ -132,21 +132,6 @@ async function run() {
             const updateStatus = {
                 $set: {
                     "status": status === 'Pending' ? 'Approved ' : 'Pending'
-                },
-            };
-            const result = await orderCollection.updateOne(filter, updateStatus, options);
-            res.json(result);
-        })
-
-        // Order Shipped status
-        app.post('/updateStatus', async (req, res) => {
-            const id = req.body.id;
-            const status = req.body.status;
-            const filter = { _id: ObjectId(id) }
-            const options = { upsert: true };
-            const updateStatus = {
-                $set: {
-                    "status": status === 'Shipping' ? 'Shipped ' : 'Shipping'
                 },
             };
             const result = await orderCollection.updateOne(filter, updateStatus, options);
