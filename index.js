@@ -17,6 +17,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
+
         // Connect to database
         await client.connect();
         const database = client.db("waves_photography")
@@ -110,7 +111,7 @@ async function run() {
             res.json(result);
         })
 
-        // Find admin role with filter by email
+        // Find admin role by email
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
@@ -130,7 +131,7 @@ async function run() {
             const options = { upsert: true };
             const updateStatus = {
                 $set: {
-                    "status": status === 'Pending' ? 'Delivered' : 'Pending'
+                    "status": status === 'Pending' ? 'Shipped' : 'Pending'
                 },
             };
             const result = await orderCollection.updateOne(filter, updateStatus, options);
